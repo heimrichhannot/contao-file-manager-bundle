@@ -1,0 +1,3 @@
+huh_file_manager_bundle:
+  resource: "@HeimrichHannotFileManagerBundle/Controller/"
+  type: annotation

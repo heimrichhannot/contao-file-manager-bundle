@@ -1,0 +1,12 @@
+/composer.lock
+/vendor
+/node_modules
+.idea
+Thumbs.db
+.DS_Store
+.sass-cache
+/build
+*.orig
+yarn.lock
+.history
+*.code-workspace

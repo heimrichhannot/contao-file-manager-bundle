@@ -1,0 +1,16 @@
+var Encore = require('@symfony/webpack-encore');
+
+Encore
+    .setOutputPath('src/Resources/public/')
+    .addEntry('contao-file-manager-bundle', './src/Resources/assets/js/contao-file-manager-bundle.js')
+    .setPublicPath('/bundles/heimrichhannotfilemanager/')
+    .setManifestKeyPrefix('bundles/heimrichhannotfilemanager')
+    .enableSassLoader()
+    .disableSingleRuntimeChunk()
+    .addExternals({
+        '@hundh/contao-utils-bundle': 'utilsBundle'
+    })
+    .enableSourceMaps(!Encore.isProduction())
+;
+
+module.exports = Encore.getWebpackConfig();
