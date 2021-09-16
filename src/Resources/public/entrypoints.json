@@ -1,0 +1,12 @@
+{
+  "entrypoints": {
+    "contao-file-manager-bundle-be": {
+      "css": [
+        "/bundles/heimrichhannotfilemanager/contao-file-manager-bundle-be.css"
+      ],
+      "js": [
+        "/bundles/heimrichhannotfilemanager/contao-file-manager-bundle-be.js"
+      ]
+    }
+  }
+}

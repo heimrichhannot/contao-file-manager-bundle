@@ -3,6 +3,8 @@ services:
     autowire: true
     autoconfigure: true
     public: true
+    #bind:
+    #  $bundleConfig: '%huh_file_manager%'
 
   HeimrichHannot\FileManagerBundle\:
-    resource: '../../{Controller}/*'
+    resource: '../../{Controller,DataContainer,EventListener}/*'
