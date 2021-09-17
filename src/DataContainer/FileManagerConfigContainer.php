@@ -19,27 +19,28 @@ use Contao\RequestToken;
 use Contao\StringUtil;
 use Contao\Versions;
 use HeimrichHannot\RequestBundle\Component\HttpFoundation\Request;
+use HeimrichHannot\TwigSupportBundle\Filesystem\TwigTemplateLocator;
 use HeimrichHannot\UtilsBundle\Dca\DcaUtil;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
 use HeimrichHannot\UtilsBundle\Url\UrlUtil;
 
 class FileManagerConfigContainer
 {
-//    protected array     $bundleConfig;
-    protected Request   $request;
-    protected ModelUtil $modelUtil;
-    protected UrlUtil   $urlUtil;
-    protected DcaUtil   $dcaUtil;
+    protected Request             $request;
+    protected ModelUtil           $modelUtil;
+    protected UrlUtil             $urlUtil;
+    protected DcaUtil             $dcaUtil;
+    protected TwigTemplateLocator $twigTemplateLocator;
 
     public function __construct(
-//        array $bundleConfig,
         Request $request,
+        TwigTemplateLocator $twigTemplateLocator,
         ModelUtil $modelUtil,
         UrlUtil $urlUtil,
         DcaUtil $dcaUtil
     ) {
-//        $this->bundleConfig = $bundleConfig;
         $this->request = $request;
+        $this->twigTemplateLocator = $twigTemplateLocator;
         $this->modelUtil = $modelUtil;
         $this->urlUtil = $urlUtil;
         $this->dcaUtil = $dcaUtil;
@@ -136,6 +137,16 @@ class FileManagerConfigContainer
      */
     public function edit($row, $href, $label, $title, $icon, $attributes)
     {
-        return BackendUser::getInstance()->canEditFieldsOf('tl_file_manager_config') ? '<a href="'.Controller::addToUrl($href.'&amp;id='.$row['id']).'" title="'.StringUtil::specialchars($title).'"'.$attributes.'>'.Image::getHtml($icon, $label).'</a> ' : Image::getHtml(preg_replace('/\.svg$/i', '_.svg', $icon)).' ';
+        return BackendUser::getInstance()->canEditFieldsOf('tl_file_manager_config') ? '<a href="'.Controller::addToUrl($href.'&amp;id='.$row['id']) . '&rt=' . RequestToken::get().'" title="'.StringUtil::specialchars($title).'"'.$attributes.'>'.Image::getHtml($icon, $label).'</a> ' : Image::getHtml(preg_replace('/\.svg$/i', '_.svg', $icon)).' ';
+    }
+
+    /**
+     * @Callback(table="tl_file_manager_config", target="fields.template.options")
+     */
+    public function getInsertTagAddItemTemplates(DataContainer $dc)
+    {
+        return $this->twigTemplateLocator->getPrefixedFiles(
+            'huh_file_manager_'
+        );
     }
 }

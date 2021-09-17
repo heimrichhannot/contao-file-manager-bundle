@@ -1,0 +1,73 @@
+{% if hasError|default %}
+    <div class="error{% block errorMessageCssClass %}{% endblock %}">
+        {{ message }}
+    </div>
+{% else %}
+    {% if breadcrumbs is not empty %}
+        <nav class="breadcrumbs-nav" aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                {% for breadcrumb in breadcrumbs %}
+                    {% if loop.last %}
+                        <li class="item active{% block breadcrumbItemCssClass %}{% endblock %}" aria-current="page">
+                            {{ breadcrumb.name }}
+                        </li>
+                    {% else %}
+                        <li class="item{{ block('breadcrumbItemCssClass') }}">
+                            <a href="{{ breadcrumb._href }}">
+                                {{ breadcrumb.name }}
+                            </a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+            </ol>
+        </nav>
+    {% endif %}
+
+    <div class="wrapper{% block tableWrapperCssClass %}{% endblock %}">
+        <table class="files-table{% block tableCssClass %}{% endblock %}">
+            <thead>
+            <tr>
+                <th></th>
+                <th>{{ 'huh.file_manager.misc.name'|trans }}</th>
+                <th>{{ 'huh.file_manager.misc.size'|trans }}</th>
+                <th>{{ 'huh.file_manager.misc.modified'|trans }}</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            {% for folder in folderData %}
+                <tr>
+                    <td>X</td>
+                    <td class="name">
+                        <a class="name" href="{{ folder._href|raw }}">
+                            {{ folder.name }}
+                        </a>
+                    </td>
+                    <td class="size">
+                        –
+                    </td>
+                    <td class="modified">
+                        {{ folder._modified }}
+                    </td>
+                </tr>
+            {% endfor %}
+            {% for file in filesData %}
+                <tr>
+                    <td>X</td>
+                    <td class="name">
+                        <a class="name" href="{{ file._href|raw }}">
+                            {{ file.name }}
+                        </a>
+                    </td>
+                    <td class="size">
+                        {{ file._size }}
+                    </td>
+                    <td class="modified">
+                        {{ file._modified }}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endif %}

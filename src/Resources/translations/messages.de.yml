@@ -1,0 +1,8 @@
+huh:
+  file_manager:
+    message:
+      access_denied: Der Zugriff auf den gewünschten Ordner "{folder}" wurde verweigert.
+    misc:
+      name: Name
+      size: Größe
+      modified: Zuletzt bearbeitet

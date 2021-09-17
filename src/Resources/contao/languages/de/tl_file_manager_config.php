@@ -17,20 +17,23 @@ $lang['tstamp'][0] = 'Änderungsdatum';
 $lang['title'][0] = 'Titel';
 $lang['title'][1] = 'Geben Sie hier bitte den Titel ein.';
 
+$lang['initialFolder'][0] = 'Initiales Verzeichnis';
+$lang['initialFolder'][1] = 'Wählen Sie das Verzeichnis aus, das dargestellt werden soll, wenn noch keines ausgewählt wurde.';
+
+$lang['allowedFolders'][0] = 'Erlaubte Verzeichnisse';
+$lang['allowedFolders'][1] = 'Wählen Sie hier die Verzeichnisse aus, auf die die Nutzer der Dateiverwaltung zugreifen dürfen. Zugriff auf die Unterverzeichnisse ist damit automatisch auch gewährt.';
+
+// template
+$lang['template'][0] = 'Template';
+$lang['template'][1] = 'Wählen Sie hier das gewünschte Template aus.';
+
 /*
  * Legends
  */
 $lang['general_legend'] = 'Allgemeine Einstellungen';
-$lang['entity_legend'] = 'Entität';
-$lang['config_legend'] = 'Konfiguration';
-$lang['filter_legend'] = 'Filter';
-$lang['overrideFilter_legend'] = 'Filter';
-$lang['sorting_legend'] = 'Sortierung';
-$lang['jumpto_legend'] = 'Weiterleitung';
-$lang['preselect_legend'] = 'Vorauswahl-Einstellungen';
-$lang['misc_legend'] = 'Verschiedenes';
-$lang['search_legend'] = 'Sucheinstellungen';
+$lang['security_legend'] = 'Sicherheit';
 $lang['template_legend'] = 'Template';
+$lang['misc_legend'] = 'Verschiedenes';
 
 /*
  * Reference
