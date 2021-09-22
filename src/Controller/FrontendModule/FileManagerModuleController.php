@@ -14,9 +14,11 @@ use Contao\CoreBundle\Controller\FrontendModule\AbstractFrontendModuleController
 use Contao\CoreBundle\Framework\ContaoFramework;
 use Contao\CoreBundle\ServiceAnnotation\FrontendModule;
 use Contao\Database;
+use Contao\FrontendUser;
 use Contao\Model;
 use Contao\StringUtil;
 use HeimrichHannot\UtilsBundle\File\FileUtil;
+use HeimrichHannot\UtilsBundle\Member\MemberUtil;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Environment;
 use Contao\File;
@@ -45,6 +47,7 @@ class FileManagerModuleController extends AbstractFrontendModuleController
     protected ModelUtil           $modelUtil;
     protected UrlUtil             $urlUtil;
     protected FileUtil            $fileUtil;
+    protected MemberUtil          $memberUtil;
 
     public function __construct(
         ContaoFramework $framework,
@@ -54,7 +57,8 @@ class FileManagerModuleController extends AbstractFrontendModuleController
         HuhRequest $request,
         ModelUtil $modelUtil,
         UrlUtil $urlUtil,
-        FileUtil $fileUtil
+        FileUtil $fileUtil,
+        MemberUtil $memberUtil
     )
     {
         $this->framework = $framework;
@@ -65,6 +69,7 @@ class FileManagerModuleController extends AbstractFrontendModuleController
         $this->modelUtil = $modelUtil;
         $this->urlUtil = $urlUtil;
         $this->fileUtil = $fileUtil;
+        $this->memberUtil = $memberUtil;
     }
 
     protected function getResponse(Template $template, ModuleModel $module, Request $request): ?Response
@@ -77,7 +82,11 @@ class FileManagerModuleController extends AbstractFrontendModuleController
             $fileManagerConfig->template ?: 'huh_file_manager_default.html.twig'
         );
 
-        $currentFolder = $request->get('folder') ?: $this->fileUtil->getPathFromUuid($fileManagerConfig->initialFolder);
+        $currentFolder = $this->getCurrentFolder($request, $fileManagerConfig);
+
+        if (!$currentFolder) {
+            throw new \Exception('No initial folder defined. You can do that either in file manager config ID ' . $module->fileManagerConfig . ' or in the currently logged in member\'s group.');
+        }
 
         if (!$this->checkPermission($currentFolder, $fileManagerConfig)) {
             $template->content = $this->twig->render($templateName, [
@@ -107,6 +116,33 @@ class FileManagerModuleController extends AbstractFrontendModuleController
         $template->content = $this->twig->render($templateName, $templateData);
 
         return $template->getResponse();
+    }
+
+    protected function getCurrentFolder(Request $request, Model $fileManagerConfig): string
+    {
+        if ($request->get('folder')) {
+            return $request->get('folder');
+        }
+
+        $currentFolder = $this->fileUtil->getPathFromUuid($fileManagerConfig->initialFolder);
+
+        $member = $this->framework->getAdapter(FrontendUser::class)->getInstance();
+
+        if (null !== $member) {
+            $groups = $this->memberUtil->getActiveGroups($member->id);
+
+            foreach ($groups as $group) {
+                if ($group->huhInitialFolder) {
+                    $currentFolder = $this->fileUtil->getPathFromUuid($group->huhInitialFolder);
+
+                    break;
+                }
+            }
+        }
+
+        // TODO event
+
+        return $currentFolder;
     }
 
     protected function addSubFilesAndFolders(Model $currentFolder, array $templateData)
@@ -230,6 +266,8 @@ class FileManagerModuleController extends AbstractFrontendModuleController
                 return false;
             }
         }
+
+        // TODO event
 
         return true;
     }

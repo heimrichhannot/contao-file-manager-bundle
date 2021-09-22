@@ -17,10 +17,10 @@ $lang['tstamp'][0] = 'Änderungsdatum';
 $lang['title'][0] = 'Titel';
 $lang['title'][1] = 'Geben Sie hier bitte den Titel ein.';
 
-$lang['initialFolder'][0] = 'Initiales Verzeichnis';
+$lang['initialFolder'][0] = 'Initiales Verzeichnis (erweiterbar in Mitgliedergruppe)';
 $lang['initialFolder'][1] = 'Wählen Sie das Verzeichnis aus, das dargestellt werden soll, wenn noch keines ausgewählt wurde.';
 
-$lang['allowedFolders'][0] = 'Erlaubte Verzeichnisse';
+$lang['allowedFolders'][0] = 'Erlaubte Verzeichnisse (erweiterbar in Mitgliedergruppe)';
 $lang['allowedFolders'][1] = 'Wählen Sie hier die Verzeichnisse aus, auf die die Nutzer der Dateiverwaltung zugreifen dürfen. Zugriff auf die Unterverzeichnisse ist damit automatisch auch gewährt.';
 
 // template

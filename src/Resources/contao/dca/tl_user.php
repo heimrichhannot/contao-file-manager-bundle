@@ -5,8 +5,8 @@ $dca = &$GLOBALS['TL_DCA']['tl_user'];
 /**
  * Palettes
  */
-$dca['palettes']['extend'] = str_replace('fop;', 'fop;{list-bundle_legend},filemanagerbundles,filemanagerbundlep;', $dca['palettes']['extend']);
-$dca['palettes']['custom'] = str_replace('fop;', 'fop;{list-bundle_legend},filemanagerbundles,filemanagerbundlep;', $dca['palettes']['custom']);
+$dca['palettes']['extend'] = str_replace('fop;', 'fop;{huh_file_manager_legend},filemanagerbundles,filemanagerbundlep;', $dca['palettes']['extend']);
+$dca['palettes']['custom'] = str_replace('fop;', 'fop;{huh_file_manager_legend},filemanagerbundles,filemanagerbundlep;', $dca['palettes']['custom']);
 
 /**
  * Fields

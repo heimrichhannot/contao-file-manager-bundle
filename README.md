@@ -4,7 +4,11 @@ This bundle offers a frontend file manager for the Contao CMS.
 
 ## Features
 
-- 
+- display a simple and clean file manager in the frontend
+- built with security in mind:
+  - takes care of the "public" state of folders
+  - always checks if the website user is allowed to see the current folder
+  - select allowed folders in a global file manager configuration or based on a member login in member groups separately
 
 ## Impressions
 
