@@ -84,7 +84,7 @@ $GLOBALS['TL_DCA']['tl_file_manager_config'] = [
     'palettes'    => [
         '__selector__' => [
         ],
-        'default'      => '{general_legend},title,initialFolder;{security_legend},allowedFolders;{template_legend},template;',
+        'default'      => '{general_legend},title,initialFolder,hideBreadcrumbNavigation;{security_legend},allowedFolders,allowedActions,uuid;{template_legend},template;',
     ],
     'subpalettes' => [
     ],
@@ -139,6 +139,22 @@ $GLOBALS['TL_DCA']['tl_file_manager_config'] = [
             'inputType' => 'fileTree',
             'eval'      => ['multiple' => true, 'fieldType' => 'checkbox', 'tl_class' => 'w50 autoheight clr'],
             'sql'       => "blob NULL"
+        ],
+        'allowedActions'           => [
+            'exclude'   => true,
+            'filter'    => true,
+            'inputType' => 'checkbox',
+            'options'   => \HeimrichHannot\FileManagerBundle\DataContainer\FileManagerConfigContainer::ACTIONS,
+            'reference' => &$GLOBALS['TL_LANG']['tl_file_manager_config']['reference'],
+            'eval'      => ['tl_class' => 'w50', 'multiple' => true],
+            'sql'       => "blob NULL"
+        ],
+        'uuid'                     => [
+            'exclude'   => true,
+            'search'    => true,
+            'inputType' => 'text',
+            'eval'      => ['maxlength' => 36, 'tl_class' => 'w50', 'mandatory' => true, 'doNotCopy' => true],
+            'sql'       => "varchar(36) NOT NULL default ''",
         ],
         // template
         'template'                 => [

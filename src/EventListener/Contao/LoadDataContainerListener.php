@@ -9,6 +9,7 @@
 namespace HeimrichHannot\FileManagerBundle\EventListener\Contao;
 
 use Contao\CoreBundle\ServiceAnnotation\Hook;
+use HeimrichHannot\UtilsBundle\Dca\DcaUtil;
 use HeimrichHannot\UtilsBundle\Util\Utils;
 
 /**
@@ -16,15 +17,23 @@ use HeimrichHannot\UtilsBundle\Util\Utils;
  */
 class LoadDataContainerListener
 {
-    protected Utils $utils;
+    protected static  $run = false;
 
-    public function __construct(Utils $utils)
+    protected Utils $utils;
+    protected DcaUtil $dcaUtil;
+
+    public function __construct(Utils $utils, DcaUtil $dcaUtil)
     {
         $this->utils = $utils;
+        $this->dcaUtil = $dcaUtil;
     }
 
     public function __invoke(string $table): void
     {
+        if (!static::$run) {
+            static::$run = true;
+        }
+
         if ($this->utils->container()->isBackend()) {
             $GLOBALS['TL_CSS']['contao-file-manager-bundle-be'] = 'bundles/heimrichhannotfilemanager/contao-file-manager-bundle-be.css|static';
         }

@@ -5,4 +5,4 @@ services:
     public: true
 
   HeimrichHannot\FileManagerBundle\:
-    resource: '../../{Controller,DataContainer,EventListener}/*'
+    resource: '../../{Controller,DataContainer,EventListener,Util}/*'

@@ -9,6 +9,7 @@ $dca = &$GLOBALS['TL_DCA']['tl_member_group'];
     ->addLegend('huh_file_manager_legend', 'account_legend', \Contao\CoreBundle\DataContainer\PaletteManipulator::POSITION_BEFORE)
     ->addField('huhInitialFolder', 'huh_file_manager_legend', \Contao\CoreBundle\DataContainer\PaletteManipulator::POSITION_APPEND)
     ->addField('huhAllowedFolders', 'huh_file_manager_legend', \Contao\CoreBundle\DataContainer\PaletteManipulator::POSITION_APPEND)
+    ->addField('huhAllowedActions', 'huh_file_manager_legend', \Contao\CoreBundle\DataContainer\PaletteManipulator::POSITION_APPEND)
     ->applyToPalette('default', 'tl_member_group');
 
 /**
@@ -25,6 +26,15 @@ $fields = [
         'exclude'   => true,
         'inputType' => 'fileTree',
         'eval'      => ['multiple' => true, 'fieldType' => 'checkbox', 'tl_class' => 'w50 autoheight'],
+        'sql'       => "blob NULL"
+    ],
+    'huhAllowedActions'           => [
+        'exclude'   => true,
+        'filter'    => true,
+        'inputType' => 'checkbox',
+        'options'   => \HeimrichHannot\FileManagerBundle\DataContainer\FileManagerConfigContainer::ACTIONS,
+        'reference' => &$GLOBALS['TL_LANG']['tl_member_group']['reference']['huhFileManager'],
+        'eval'      => ['tl_class' => 'w50', 'multiple' => true],
         'sql'       => "blob NULL"
     ],
 ];

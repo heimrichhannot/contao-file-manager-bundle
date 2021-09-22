@@ -28,3 +28,8 @@ The file manager in the frontend
 
 Event               | Description
 --------------------|------------
+
+## TODO
+
+- batch processing
+- actions: copy, move, rename, upload

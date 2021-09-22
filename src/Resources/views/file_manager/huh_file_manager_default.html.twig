@@ -8,14 +8,18 @@
             <ol class="breadcrumb">
                 {% for breadcrumb in breadcrumbs %}
                     {% if loop.last %}
-                        <li class="item active{% block breadcrumbItemCssClass %}{% endblock %}" aria-current="page">
+                        <li class="item level-{{ loop.index }} active{% block breadcrumbItemCssClass %}{% endblock %}" aria-current="page">
                             {{ breadcrumb.name }}
                         </li>
                     {% else %}
-                        <li class="item{{ block('breadcrumbItemCssClass') }}">
-                            <a href="{{ breadcrumb._href }}">
+                        <li class="item level-{{ loop.index }}{{ block('breadcrumbItemCssClass') }}">
+                            {% if breadcrumb._href|default %}
+                                <a href="{{ breadcrumb._href }}">
+                                    {{ breadcrumb.name }}
+                                </a>
+                            {% else %}
                                 {{ breadcrumb.name }}
-                            </a>
+                            {% endif %}
                         </li>
                     {% endif %}
                 {% endfor %}
@@ -27,17 +31,19 @@
         <table class="files-table{% block tableCssClass %}{% endblock %}">
             <thead>
             <tr>
-                <th></th>
-                <th>{{ 'huh.file_manager.misc.name'|trans }}</th>
-                <th>{{ 'huh.file_manager.misc.size'|trans }}</th>
-                <th>{{ 'huh.file_manager.misc.modified'|trans }}</th>
+                <th class="name">{{ 'huh.file_manager.misc.name'|trans }}</th>
+                <th class="size">{{ 'huh.file_manager.misc.size'|trans }}</th>
+                <th class="modified">{{ 'huh.file_manager.misc.modified'|trans }}</th>
+
+                {% if actions|default([]) is not empty %}
+                    <th class="actions"></th>
+                {% endif %}
             </tr>
             </thead>
 
             <tbody>
             {% for folder in folderData %}
                 <tr>
-                    <td>X</td>
                     <td class="name">
                         <a class="name" href="{{ folder._href|raw }}">
                             {{ folder.name }}
@@ -49,11 +55,20 @@
                     <td class="modified">
                         {{ folder._modified }}
                     </td>
+
+                    {% if actions|default([]) is not empty %}
+                        <td class="actions">
+                            {% for action in actions %}
+                                <a title="{{ folder._actions[action].title }}" class="{{ folder._actions[action].class }}" href="{{ folder._actions[action].href }}">
+                                    <span>{{ folder._actions[action].title }}</span>
+                                </a>
+                            {% endfor %}
+                        </td>
+                    {% endif %}
                 </tr>
             {% endfor %}
             {% for file in filesData %}
                 <tr>
-                    <td>X</td>
                     <td class="name">
                         <a class="name" href="{{ file._href|raw }}">
                             {{ file.name }}
@@ -65,6 +80,16 @@
                     <td class="modified">
                         {{ file._modified }}
                     </td>
+
+                    {% if actions|default([]) is not empty %}
+                        <td class="actions">
+                            {% for action in actions %}
+                                <a title="{{ file._actions[action].title }}" class="{{ file._actions[action].class }}" href="{{ file._actions[action].href }}">
+                                    <span>{{ file._actions[action].title }}</span>
+                                </a>
+                            {% endfor %}
+                        </td>
+                    {% endif %}
                 </tr>
             {% endfor %}
             </tbody>

@@ -26,6 +26,20 @@ use HeimrichHannot\UtilsBundle\Url\UrlUtil;
 
 class FileManagerConfigContainer
 {
+    const ACTION_UPLOAD = 'upload';
+    const ACTION_RENAME = 'rename';
+    const ACTION_COPY   = 'copy';
+    const ACTION_MOVE   = 'move';
+    const ACTION_DELETE = 'delete';
+
+    const ACTIONS = [
+//        self::ACTION_UPLOAD,
+//        self::ACTION_RENAME,
+//        self::ACTION_COPY,
+//        self::ACTION_MOVE,
+        self::ACTION_DELETE
+    ];
+
     protected Request             $request;
     protected ModelUtil           $modelUtil;
     protected UrlUtil             $urlUtil;
@@ -39,11 +53,11 @@ class FileManagerConfigContainer
         UrlUtil $urlUtil,
         DcaUtil $dcaUtil
     ) {
-        $this->request = $request;
+        $this->request             = $request;
         $this->twigTemplateLocator = $twigTemplateLocator;
-        $this->modelUtil = $modelUtil;
-        $this->urlUtil = $urlUtil;
-        $this->dcaUtil = $dcaUtil;
+        $this->modelUtil           = $modelUtil;
+        $this->urlUtil             = $urlUtil;
+        $this->dcaUtil             = $dcaUtil;
     }
 
     /**
@@ -104,6 +118,21 @@ class FileManagerConfigContainer
     }
 
     /**
+     * @Callback(table="tl_file_manager_config", target="fields.uuid.load")
+     */
+    public function setUuid($value, DataContainer $dc)
+    {
+        // keep uuid if set
+        if ($value) {
+            $GLOBALS['TL_DCA']['tl_file_manager_config']['fields']['uuid']['eval']['readonly'] = true;
+
+            return $value;
+        }
+
+        return md5(uniqid(rand(), true));
+    }
+
+    /**
      * @Callback(table="tl_file_manager_config", target="list.sorting.paste_button")
      */
     public function pasteFileManagerConfig(DataContainer $dc, $row, $table, $cr, $arrClipboard = null)
@@ -137,7 +166,7 @@ class FileManagerConfigContainer
      */
     public function edit($row, $href, $label, $title, $icon, $attributes)
     {
-        return BackendUser::getInstance()->canEditFieldsOf('tl_file_manager_config') ? '<a href="'.Controller::addToUrl($href.'&amp;id='.$row['id']) . '&rt=' . RequestToken::get().'" title="'.StringUtil::specialchars($title).'"'.$attributes.'>'.Image::getHtml($icon, $label).'</a> ' : Image::getHtml(preg_replace('/\.svg$/i', '_.svg', $icon)).' ';
+        return BackendUser::getInstance()->canEditFieldsOf('tl_file_manager_config') ? '<a href="' . Controller::addToUrl($href . '&amp;id=' . $row['id']) . '&rt=' . RequestToken::get() . '" title="' . StringUtil::specialchars($title) . '"' . $attributes . '>' . Image::getHtml($icon, $label) . '</a> ' : Image::getHtml(preg_replace('/\.svg$/i', '_.svg', $icon)) . ' ';
     }
 
     /**
