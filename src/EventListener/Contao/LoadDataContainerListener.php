@@ -17,7 +17,7 @@ use HeimrichHannot\UtilsBundle\Util\Utils;
  */
 class LoadDataContainerListener
 {
-    protected static  $run = false;
+    protected static $run = false;
 
     protected Utils $utils;
     protected DcaUtil $dcaUtil;
@@ -36,6 +36,10 @@ class LoadDataContainerListener
 
         if ($this->utils->container()->isBackend()) {
             $GLOBALS['TL_CSS']['contao-file-manager-bundle-be'] = 'bundles/heimrichhannotfilemanager/contao-file-manager-bundle-be.css|static';
+        }
+
+        if ($this->utils->container()->isFrontend()) {
+            $GLOBALS['TL_JAVASCRIPT']['contao-file-manager-bundle'] = 'bundles/heimrichhannotfilemanager/contao-file-manager-bundle.js|static';
         }
     }
 }

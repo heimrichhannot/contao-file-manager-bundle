@@ -13,6 +13,7 @@ use Contao\Config;
 use Contao\Controller;
 use Contao\CoreBundle\Controller\FrontendModule\AbstractFrontendModuleController;
 use Contao\CoreBundle\Framework\ContaoFramework;
+use Contao\CoreBundle\Image\PictureFactoryInterface;
 use Contao\CoreBundle\ServiceAnnotation\FrontendModule;
 use Contao\File;
 use Contao\Model;
@@ -42,16 +43,17 @@ class FileManagerModuleController extends AbstractFrontendModuleController
 {
     const TYPE = 'huh_file_manager';
 
-    protected ContaoFramework      $framework;
-    protected Environment          $twig;
-    protected TwigTemplateLocator  $twigTemplateLocator;
-    protected TranslatorInterface  $translator;
-    protected HuhRequest           $request;
-    protected ModelUtil            $modelUtil;
-    protected UrlUtil              $urlUtil;
-    protected FileUtil             $fileUtil;
-    protected FileManagerUtil      $fileManagerUtil;
-    protected StatusMessageManager $statusMessageManager;
+    protected ContaoFramework         $framework;
+    protected Environment             $twig;
+    protected TwigTemplateLocator     $twigTemplateLocator;
+    protected TranslatorInterface     $translator;
+    protected HuhRequest              $request;
+    protected ModelUtil               $modelUtil;
+    protected UrlUtil                 $urlUtil;
+    protected FileUtil                $fileUtil;
+    protected FileManagerUtil         $fileManagerUtil;
+    protected StatusMessageManager    $statusMessageManager;
+    protected PictureFactoryInterface $pictureFactory;
 
     public function __construct(
         ContainerInterface $container,
@@ -64,7 +66,8 @@ class FileManagerModuleController extends AbstractFrontendModuleController
         UrlUtil $urlUtil,
         FileUtil $fileUtil,
         FileManagerUtil $fileManagerUtil,
-        StatusMessageManager $statusMessageManager
+        StatusMessageManager $statusMessageManager,
+        PictureFactoryInterface $pictureFactory
     ) {
         $this->container = $container;
         $this->framework = $framework;
@@ -77,6 +80,7 @@ class FileManagerModuleController extends AbstractFrontendModuleController
         $this->fileUtil = $fileUtil;
         $this->fileManagerUtil = $fileManagerUtil;
         $this->statusMessageManager = $statusMessageManager;
+        $this->pictureFactory = $pictureFactory;
     }
 
     public function addEncoreAssets()
@@ -106,9 +110,9 @@ class FileManagerModuleController extends AbstractFrontendModuleController
             $module->id
         );
 
-        $templateData = [
-            'scopeKey' => $scopeKey,
-        ];
+        $templateData = $fileManagerConfig->row();
+
+        $templateData['scopeKey'] = $scopeKey;
 
         $templateName = $this->twigTemplateLocator->getTemplatePath(
             $fileManagerConfig->template ?: 'huh_file_manager_default.html.twig'
@@ -139,7 +143,7 @@ class FileManagerModuleController extends AbstractFrontendModuleController
 
         $currentFolder = $this->modelUtil->callModelMethod('tl_files', 'findByPath', $currentFolder);
 
-        $templateData = $this->addSubFilesAndFolders($currentFolder, $templateData);
+        $templateData = $this->addSubFilesAndFolders($currentFolder, $templateData, $fileManagerConfig);
 
         if (!$fileManagerConfig->hideBreadcrumbNavigation) {
             $templateData = $this->addBreadcrumbNavigation($currentFolder, $templateData, $fileManagerConfig);
@@ -175,7 +179,7 @@ class FileManagerModuleController extends AbstractFrontendModuleController
         return $currentFolder;
     }
 
-    protected function addSubFilesAndFolders(Model $currentFolder, array $templateData)
+    protected function addSubFilesAndFolders(Model $currentFolder, array $templateData, Model $fileManagerConfig)
     {
         $options = [
             'order' => 'name ASC',
@@ -225,6 +229,10 @@ class FileManagerModuleController extends AbstractFrontendModuleController
                     continue;
                 }
 
+                if ($fileManagerConfig->addThumbnailImages) {
+                    $data['_thumbnailPicture'] = $this->getThumbnailImage($files->current(), $fileManagerConfig);
+                }
+
                 $data['_href'] = $this->urlUtil->addQueryString('file='.$files->path);
                 $data['_modified'] = date(Config::get('datimFormat'), $files->tstamp);
                 $data['_size'] = System::getReadableSize($file->filesize);
@@ -237,6 +245,31 @@ class FileManagerModuleController extends AbstractFrontendModuleController
         $templateData['folderData'] = $folderData;
 
         return $templateData;
+    }
+
+    protected function getThumbnailImage(Model $file, Model $fileManagerConfig): ?array
+    {
+        if (!\in_array($file->extension, explode(',', Config::get('validImageTypes')))) {
+            return null;
+        }
+
+        $picture = $this->pictureFactory->create(
+            $this->getParameter('kernel.project_dir').'/'.$file->path,
+            StringUtil::deserialize($fileManagerConfig->thumbnailImageSize, true)
+        );
+
+        $meta = StringUtil::deserialize($file->meta, true);
+
+        $alt = '';
+
+        if (isset($meta[$GLOBALS['TL_LANGUAGE'] ?: 'en']['alt'])) {
+            $alt = $meta[$GLOBALS['TL_LANGUAGE'] ?: 'en']['alt'];
+        }
+
+        return [
+            'path' => $picture->getImg($this->getParameter('kernel.project_dir'))['src'],
+            'alt' => $alt,
+        ];
     }
 
     protected function addBreadcrumbNavigation(Model $currentFolder, array $templateData, Model $fileManagerConfig)
@@ -294,9 +327,10 @@ class FileManagerModuleController extends AbstractFrontendModuleController
                 }
 
                 $actionsData[$action] = [
-                    'title' => $GLOBALS['TL_LANG']['tl_file_manager_config']['reference'][$action],
+                    'title' => $this->translator->trans('huh.file_manager.misc.'.$action),
                     'class' => $slug->generate($action),
                     'href' => $this->getActionUrl($action, $folder['uuid'], $fileManagerConfig, $request, $module),
+                    'attributes' => $this->getActionAttributes($action, $folder),
                 ];
             }
 
@@ -304,7 +338,7 @@ class FileManagerModuleController extends AbstractFrontendModuleController
         }
 
         // files
-        foreach ($templateData['filesData'] as &$files) {
+        foreach ($templateData['filesData'] as &$file) {
             $actionsData = [];
 
             foreach ($actions as $action) {
@@ -313,13 +347,18 @@ class FileManagerModuleController extends AbstractFrontendModuleController
                 }
 
                 $actionsData[$action] = [
-                    'title' => $GLOBALS['TL_LANG']['tl_file_manager_config']['reference'][$action],
+                    'title' => $this->translator->trans('huh.file_manager.misc.'.$action),
                     'class' => $slug->generate($action),
-                    'href' => $this->getActionUrl($action, $files['uuid'], $fileManagerConfig, $request, $module),
+                    'href' => $this->getActionUrl($action, $file['uuid'], $fileManagerConfig, $request, $module),
+                    'attributes' => $this->getActionAttributes($action, $file),
                 ];
             }
 
-            $files['_actions'] = $actionsData;
+            $file['_actions'] = $actionsData;
+        }
+
+        if (empty($templateData['folderData']) && empty($templateData['filesData'])) {
+            $templateData['emptyText'] = $this->translator->trans('huh.file_manager.message.no_files_in_folder');
         }
 
         return $templateData;
@@ -341,5 +380,25 @@ class FileManagerModuleController extends AbstractFrontendModuleController
         }
 
         return '#';
+    }
+
+    protected function getActionAttributes(string $action, array $file): string
+    {
+        $attributes = [];
+
+        switch ($action) {
+            case FileManagerConfigContainer::ACTION_DELETE:
+                $attributes['data-delete-confirm-message'] = $this->translator->trans('huh.file_manager.message.really_delete_'.$file['type'], [
+                    '{name}' => $file['name'],
+                ]);
+        }
+
+        $result = '';
+
+        foreach ($attributes as $name => $value) {
+            $result .= $name.'="'.htmlspecialchars($value, \ENT_QUOTES, 'UTF-8').'" ';
+        }
+
+        return trim($result);
     }
 }

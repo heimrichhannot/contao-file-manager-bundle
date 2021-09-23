@@ -7,54 +7,54 @@
  */
 
 $GLOBALS['TL_DCA']['tl_file_manager_config'] = [
-    'config'      => [
-        'dataContainer'    => 'Table',
+    'config' => [
+        'dataContainer' => 'Table',
         'enableVersioning' => true,
-        'sql'              => [
+        'sql' => [
             'keys' => [
                 'id' => 'primary',
             ],
         ],
     ],
-    'list'        => [
-        'label'             => [
+    'list' => [
+        'label' => [
             'fields' => ['title'],
             'format' => '%s',
         ],
-        'sorting'           => [
-            'mode'         => 5,
-            'fields'       => ['title'],
+        'sorting' => [
+            'mode' => 5,
+            'fields' => ['title'],
             'headerFields' => ['title'],
-            'panelLayout'  => 'filter;sort,search,limit',
+            'panelLayout' => 'filter;sort,search,limit',
         ],
         'global_operations' => [
-            'toggleNodes'        => [
+            'toggleNodes' => [
                 'label' => &$GLOBALS['TL_LANG']['MSC']['toggleAll'],
-                'href'  => 'ptg=all',
+                'href' => 'ptg=all',
                 'class' => 'header_toggle',
             ],
             'sortAlphabetically' => [
                 'label' => &$GLOBALS['TL_LANG']['tl_file_manager_config']['sortAlphabetically'],
-                'href'  => 'key=sort_alphabetically',
+                'href' => 'key=sort_alphabetically',
                 'class' => 'header_toggle',
             ],
-            'all'                => [
-                'label'      => &$GLOBALS['TL_LANG']['MSC']['all'],
-                'href'       => 'act=select',
-                'class'      => 'header_edit_all',
+            'all' => [
+                'label' => &$GLOBALS['TL_LANG']['MSC']['all'],
+                'href' => 'act=select',
+                'class' => 'header_edit_all',
                 'attributes' => 'onclick="Backend.getScrollOffset();"',
             ],
         ],
-        'operations'        => [
-            'edit'   => [
+        'operations' => [
+            'edit' => [
                 'label' => &$GLOBALS['TL_LANG']['tl_file_manager_config']['edit'],
-                'href'  => 'act=edit',
-                'icon'  => 'edit.svg',
+                'href' => 'act=edit',
+                'icon' => 'edit.svg',
             ],
-            'copy'   => [
+            'copy' => [
                 'label' => &$GLOBALS['TL_LANG']['tl_file_manager_config']['copy'],
-                'href'  => 'act=copy',
-                'icon'  => 'copy.gif',
+                'href' => 'act=copy',
+                'icon' => 'copy.gif',
             ],
 //            'copyChilds' => [
 //                'label' => &$GLOBALS['TL_LANG']['tl_file_manager_config']['copyChilds'],
@@ -62,107 +62,125 @@ $GLOBALS['TL_DCA']['tl_file_manager_config'] = [
 //                'icon' => 'copychilds.gif',
 //                'attributes' => 'onclick="Backend.getScrollOffset()"',
 //            ],
-            'cut'    => [
-                'label'      => &$GLOBALS['TL_LANG']['tl_file_manager_config']['cut'],
-                'href'       => 'act=paste&amp;mode=cut',
-                'icon'       => 'cut.svg',
+            'cut' => [
+                'label' => &$GLOBALS['TL_LANG']['tl_file_manager_config']['cut'],
+                'href' => 'act=paste&amp;mode=cut',
+                'icon' => 'cut.svg',
                 'attributes' => 'onclick="Backend.getScrollOffset()"',
             ],
             'delete' => [
-                'label'      => &$GLOBALS['TL_LANG']['tl_file_manager_config']['delete'],
-                'href'       => 'act=delete',
-                'icon'       => 'delete.gif',
-                'attributes' => 'onclick="if(!confirm(\'' . $GLOBALS['TL_LANG']['MSC']['deleteConfirm'] . '\'))return false;Backend.getScrollOffset()"',
+                'label' => &$GLOBALS['TL_LANG']['tl_file_manager_config']['delete'],
+                'href' => 'act=delete',
+                'icon' => 'delete.gif',
+                'attributes' => 'onclick="if(!confirm(\''.$GLOBALS['TL_LANG']['MSC']['deleteConfirm'].'\'))return false;Backend.getScrollOffset()"',
             ],
-            'show'   => [
+            'show' => [
                 'label' => &$GLOBALS['TL_LANG']['tl_file_manager_config']['show'],
-                'href'  => 'act=show',
-                'icon'  => 'show.gif',
+                'href' => 'act=show',
+                'icon' => 'show.gif',
             ],
         ],
     ],
-    'palettes'    => [
+    'palettes' => [
         '__selector__' => [
+            'addThumbnailImages',
         ],
-        'default'      => '{general_legend},title,initialFolder,hideBreadcrumbNavigation;{security_legend},allowedFolders,allowedActions,uuid;{template_legend},template;',
+        'default' => '{general_legend},title,initialFolder,hideBreadcrumbNavigation,addThumbnailImages;{security_legend},allowedFolders,allowedActions,uuid;{template_legend},template;',
     ],
     'subpalettes' => [
+        'addThumbnailImages' => 'thumbnailImageSize',
     ],
-    'fields'      => [
-        'id'                       => [
-            'sql'  => 'int(10) unsigned NOT NULL auto_increment',
+    'fields' => [
+        'id' => [
+            'sql' => 'int(10) unsigned NOT NULL auto_increment',
             'eval' => ['notOverridable' => true],
         ],
-        'pid'                      => [
+        'pid' => [
             'sql' => "int(10) unsigned NOT NULL default '0'",
         ],
-        'tstamp'                   => [
+        'tstamp' => [
             'eval' => ['notOverridable' => true],
-            'sql'  => "int(10) unsigned NOT NULL default '0'",
+            'sql' => "int(10) unsigned NOT NULL default '0'",
         ],
-        'sorting'                  => [
+        'sorting' => [
             'eval' => ['notOverridable' => true],
-            'sql'  => "int(10) unsigned NOT NULL default '0'",
+            'sql' => "int(10) unsigned NOT NULL default '0'",
         ],
-        'dateAdded'                => [
-            'label'   => &$GLOBALS['TL_LANG']['MSC']['dateAdded'],
+        'dateAdded' => [
+            'label' => &$GLOBALS['TL_LANG']['MSC']['dateAdded'],
             'sorting' => true,
-            'flag'    => 6,
-            'eval'    => ['rgxp' => 'datim', 'doNotCopy' => true, 'notOverridable' => true],
-            'sql'     => "int(10) unsigned NOT NULL default '0'",
+            'flag' => 6,
+            'eval' => ['rgxp' => 'datim', 'doNotCopy' => true, 'notOverridable' => true],
+            'sql' => "int(10) unsigned NOT NULL default '0'",
         ],
         // general
-        'title'                    => [
-            'exclude'   => true,
-            'search'    => true,
-            'sorting'   => true,
-            'flag'      => 1,
+        'title' => [
+            'exclude' => true,
+            'search' => true,
+            'sorting' => true,
+            'flag' => 1,
             'inputType' => 'text',
-            'eval'      => ['mandatory' => true, 'tl_class' => 'w50', 'notOverridable' => true],
-            'sql'       => "varchar(255) NOT NULL default ''",
+            'eval' => ['mandatory' => true, 'tl_class' => 'w50', 'notOverridable' => true],
+            'sql' => "varchar(255) NOT NULL default ''",
         ],
-        'initialFolder'            => [
-            'exclude'   => true,
+        'initialFolder' => [
+            'exclude' => true,
             'inputType' => 'fileTree',
-            'eval'      => ['fieldType' => 'radio', 'tl_class' => 'w50 autoheight clr'],
-            'sql'       => "binary(16) NULL"
+            'eval' => ['fieldType' => 'radio', 'tl_class' => 'w50 autoheight clr'],
+            'sql' => 'binary(16) NULL',
         ],
         'hideBreadcrumbNavigation' => [
-            'exclude'   => true,
+            'exclude' => true,
             'inputType' => 'checkbox',
-            'eval'      => ['tl_class' => 'w50'],
-            'sql'       => "char(1) NOT NULL default ''"
+            'eval' => ['tl_class' => 'w50'],
+            'sql' => "char(1) NOT NULL default ''",
+        ],
+        'addThumbnailImages' => [
+            'exclude' => true,
+            'inputType' => 'checkbox',
+            'eval' => ['tl_class' => 'w50', 'submitOnChange' => true],
+            'sql' => "char(1) NOT NULL default ''",
+        ],
+        'thumbnailImageSize' => [
+            'exclude' => true,
+            'inputType' => 'imageSize',
+            'reference' => &$GLOBALS['TL_LANG']['MSC'],
+            'eval' => ['rgxp' => 'natural', 'includeBlankOption' => true, 'nospace' => true, 'helpwizard' => true, 'tl_class' => 'w50', 'mandatory' => true],
+            'options_callback' => static function () {
+                return Contao\System::getContainer()->get('contao.image.image_sizes')->getOptionsForUser(Contao\BackendUser::getInstance());
+            },
+            'sql' => "varchar(128) NOT NULL default ''",
         ],
         // security
-        'allowedFolders'           => [
-            'exclude'   => true,
+        'allowedFolders' => [
+            'exclude' => true,
             'inputType' => 'fileTree',
-            'eval'      => ['multiple' => true, 'fieldType' => 'checkbox', 'tl_class' => 'w50 autoheight clr'],
-            'sql'       => "blob NULL"
+            'eval' => ['multiple' => true, 'fieldType' => 'checkbox', 'tl_class' => 'w50 autoheight clr'],
+            'sql' => 'blob NULL',
         ],
-        'allowedActions'           => [
-            'exclude'   => true,
-            'filter'    => true,
+        'allowedActions' => [
+            'exclude' => true,
+            'filter' => true,
             'inputType' => 'checkbox',
-            'options'   => \HeimrichHannot\FileManagerBundle\DataContainer\FileManagerConfigContainer::ACTIONS,
+            'options' => \HeimrichHannot\FileManagerBundle\DataContainer\FileManagerConfigContainer::ACTIONS,
             'reference' => &$GLOBALS['TL_LANG']['tl_file_manager_config']['reference'],
-            'eval'      => ['tl_class' => 'w50', 'multiple' => true],
-            'sql'       => "blob NULL"
+            'eval' => ['tl_class' => 'w50', 'multiple' => true],
+            'sql' => 'blob NULL',
         ],
-        'uuid'                     => [
-            'exclude'   => true,
-            'search'    => true,
+        'uuid' => [
+            'exclude' => true,
+            'search' => true,
             'inputType' => 'text',
-            'eval'      => ['maxlength' => 36, 'tl_class' => 'w50', 'mandatory' => true, 'doNotCopy' => true],
-            'sql'       => "varchar(36) NOT NULL default ''",
+            'eval' => ['maxlength' => 36, 'tl_class' => 'w50', 'mandatory' => true, 'doNotCopy' => true],
+            'sql' => "varchar(36) NOT NULL default ''",
         ],
         // template
-        'template'                 => [
-            'exclude'   => true,
-            'filter'    => true,
+        'template' => [
+            'exclude' => true,
+            'filter' => true,
             'inputType' => 'select',
-            'eval'      => ['tl_class' => 'w50', 'includeBlankOption' => true, 'chosen' => true],
-            'sql'       => "varchar(255) NOT NULL default ''",
+            'eval' => ['tl_class' => 'w50', 'includeBlankOption' => true, 'chosen' => true],
+            'sql' => "varchar(255) NOT NULL default ''",
         ],
     ],
 ];

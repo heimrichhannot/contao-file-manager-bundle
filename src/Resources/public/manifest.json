@@ -1,4 +1,5 @@
 {
+  "bundles/heimrichhannotfilemanager/contao-file-manager-bundle.js": "/bundles/heimrichhannotfilemanager/contao-file-manager-bundle.js",
   "bundles/heimrichhannotfilemanager/contao-file-manager-bundle-be.css": "/bundles/heimrichhannotfilemanager/contao-file-manager-bundle-be.css",
   "bundles/heimrichhannotfilemanager/contao-file-manager-bundle-be.js": "/bundles/heimrichhannotfilemanager/contao-file-manager-bundle-be.js"
 }

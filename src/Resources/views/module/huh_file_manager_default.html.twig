@@ -33,10 +33,16 @@
 {% endif %}
 
 {% if folderData|default is not empty or filesData|default is not empty %}
-    <div class="wrapper{% block tableWrapperCssClass %}{% endblock %}">
+    <div class="wrapper{% block tableWrapperCssClass %}{% endblock %}"
+         data-yes-label="{{ 'huh.file_manager.misc.yes'|trans }}"
+         data-no-label="{{ 'huh.file_manager.misc.no'|trans }}">
         <table class="files-table{% block tableCssClass %}{% endblock %}">
             <thead>
             <tr>
+                {% if addThumbnailImages|default %}
+                    <th class="thumbnail"></th>
+                {% endif %}
+
                 <th class="name">{{ 'huh.file_manager.misc.name'|trans }}</th>
                 <th class="size">{{ 'huh.file_manager.misc.size'|trans }}</th>
                 <th class="modified">{{ 'huh.file_manager.misc.modified'|trans }}</th>
@@ -50,6 +56,10 @@
             <tbody>
             {% for folder in folderData %}
                 <tr>
+                    {% if addThumbnailImages|default %}
+                        <td class="thumbnail"></td>
+                    {% endif %}
+
                     <td class="name">
                         <a class="name" href="{{ folder._href|raw }}">
                             {{ folder.name }}
@@ -65,7 +75,10 @@
                     {% if actions|default([]) is not empty %}
                         <td class="actions">
                             {% for action in actions %}
-                                <a title="{{ folder._actions[action].title }}" class="{{ folder._actions[action].class }}" href="{{ folder._actions[action].href }}">
+                                <a title="{{ folder._actions[action].title }}"
+                                   class="{{ folder._actions[action].class }}{% block actionCssClass %}{% endblock %}"
+                                   href="{{ folder._actions[action].href }}"
+                                   {{ folder._actions[action].attributes|raw }}>
                                     <span>{{ folder._actions[action].title }}</span>
                                 </a>
                             {% endfor %}
@@ -75,6 +88,16 @@
             {% endfor %}
             {% for file in filesData %}
                 <tr>
+                    {% if addThumbnailImages|default %}
+                        <td class="thumbnail">
+                            {% if file._thumbnailPicture|default %}
+                                <a class="thumbnail" href="{{ file._href|raw }}">
+                                    <img src="{{ file._thumbnailPicture.path }}" alt="{{ file._thumbnailPicture.alt }}">
+                                </a>
+                            {% endif %}
+                        </td>
+                    {% endif %}
+
                     <td class="name">
                         <a class="name" href="{{ file._href|raw }}">
                             {{ file.name }}
@@ -90,7 +113,10 @@
                     {% if actions|default([]) is not empty %}
                         <td class="actions">
                             {% for action in actions %}
-                                <a title="{{ file._actions[action].title }}" class="{{ file._actions[action].class }}" href="{{ file._actions[action].href }}">
+                                <a title="{{ file._actions[action].title }}"
+                                   class="{{ file._actions[action].class }}{{ block('actionCssClass') }}"
+                                   href="{{ file._actions[action].href }}"
+                                   {{ file._actions[action].attributes|raw }}>
                                     <span>{{ file._actions[action].title }}</span>
                                 </a>
                             {% endfor %}
@@ -101,4 +127,6 @@
             </tbody>
         </table>
     </div>
+{% elseif emptyText|default %}
+    <p class="empty-text{% block emptyTextCssClass %}{% endblock %}">{{ emptyText }}</p>
 {% endif %}

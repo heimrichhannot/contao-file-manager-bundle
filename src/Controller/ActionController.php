@@ -92,24 +92,24 @@ class ActionController
             return new Response('Access denied for the given file/folder.', 403);
         }
 
-//        if ('file' === $model->type) {
-//            $file = new File($model->path);
-//
-//            $file->delete();
-//        } elseif ('folder' === $model->type) {
-//            $folder = new Folder($model->path);
-//
-//            $folder->delete();
-//        } else {
-//            return new Response('File object has invalid type.', 500);
-//        }
+        if ('file' === $model->type) {
+            $file = new File($model->path);
+
+            $file->delete();
+        } elseif ('folder' === $model->type) {
+            $folder = new Folder($model->path);
+
+            $folder->delete();
+        } else {
+            return new Response('File object has invalid type.', 500);
+        }
 
         $successMessage = $this->translator->trans('huh.file_manager.message.'.$model->type.'_deleted_successfully', [
-            '{path}' => basename($model->name),
+            '{name}' => basename($model->name),
         ]);
 
         if ($request->isXmlHttpRequest()) {
-            return new Response($this->translator->trans('huh.file_manager.message.'.$model->type.'_deleted_successfully'));
+            return new Response($successMessage);
         }
 
         // redirect if synchronous request (don't allow complete redirect urls to avoid redirect exploitation
