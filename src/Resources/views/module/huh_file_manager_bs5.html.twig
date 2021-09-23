@@ -1,6 +1,6 @@
-{% extends '@HeimrichHannotFileManager/file_manager/huh_file_manager_default.html.twig' %}
+{% extends '@HeimrichHannotFileManager/module/huh_file_manager_default.html.twig' %}
 
-{% block errorMessageCssClass %} alert alert-danger{% endblock %}
+{% block messageCssClass %} alert alert-{{ message.type == 'error' ? 'danger' : message.type }}{% endblock %}
 {% block breadcrumbItemCssClass %} breadcrumb-item{% endblock %}
 {% block tableWrapperCssClass %} table-responsive{% endblock %}
 {% block tableCssClass %} table table-striped table-hover{% endblock %}

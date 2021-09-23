@@ -28,8 +28,8 @@ class FileManagerConfigContainer
 {
     const ACTION_UPLOAD = 'upload';
     const ACTION_RENAME = 'rename';
-    const ACTION_COPY   = 'copy';
-    const ACTION_MOVE   = 'move';
+    const ACTION_COPY = 'copy';
+    const ACTION_MOVE = 'move';
     const ACTION_DELETE = 'delete';
 
     const ACTIONS = [
@@ -37,7 +37,7 @@ class FileManagerConfigContainer
 //        self::ACTION_RENAME,
 //        self::ACTION_COPY,
 //        self::ACTION_MOVE,
-        self::ACTION_DELETE
+        self::ACTION_DELETE,
     ];
 
     protected Request             $request;
@@ -53,11 +53,11 @@ class FileManagerConfigContainer
         UrlUtil $urlUtil,
         DcaUtil $dcaUtil
     ) {
-        $this->request             = $request;
+        $this->request = $request;
         $this->twigTemplateLocator = $twigTemplateLocator;
-        $this->modelUtil           = $modelUtil;
-        $this->urlUtil             = $urlUtil;
-        $this->dcaUtil             = $dcaUtil;
+        $this->modelUtil = $modelUtil;
+        $this->urlUtil = $urlUtil;
+        $this->dcaUtil = $dcaUtil;
     }
 
     /**
@@ -98,7 +98,7 @@ class FileManagerConfigContainer
             throw new RedirectResponseException($this->urlUtil->removeQueryString(['key']));
         }
 
-        return '<a href="' . $this->urlUtil->addQueryString('key=sortAlphabetically') . '" class="header_new" style="background-image: url(system/themes/flexible/icons/rows.svg)" title="' . $GLOBALS['TL_LANG']['tl_file_manager_config']['sortAlphabetically'][1] . '" accesskey="n" onclick="if(!confirm(\'' . $GLOBALS['TL_LANG']['tl_file_manager_config']['reference']['sortAlphabeticallyConfirm'] . '\'))return false;Backend.getScrollOffset()">' . $GLOBALS['TL_LANG']['tl_file_manager_config']['sortAlphabetically'][0] . '</a>';
+        return '<a href="'.$this->urlUtil->addQueryString('key=sortAlphabetically').'" class="header_new" style="background-image: url(system/themes/flexible/icons/rows.svg)" title="'.$GLOBALS['TL_LANG']['tl_file_manager_config']['sortAlphabetically'][1].'" accesskey="n" onclick="if(!confirm(\''.$GLOBALS['TL_LANG']['tl_file_manager_config']['reference']['sortAlphabeticallyConfirm'].'\'))return false;Backend.getScrollOffset()">'.$GLOBALS['TL_LANG']['tl_file_manager_config']['sortAlphabetically'][0].'</a>';
     }
 
     /**
@@ -150,15 +150,15 @@ class FileManagerConfigContainer
 
         // Return the buttons
         $imagePasteAfter = Image::getHtml('pasteafter.svg', sprintf($GLOBALS['TL_LANG'][$table]['pasteafter'][1], $row['id']));
-        $imagePasteInto  = Image::getHtml('pasteinto.svg', sprintf($GLOBALS['TL_LANG'][$table]['pasteinto'][1], $row['id']));
+        $imagePasteInto = Image::getHtml('pasteinto.svg', sprintf($GLOBALS['TL_LANG'][$table]['pasteinto'][1], $row['id']));
 
         if ($row['id'] > 0) {
-            $return = $disablePA ? Image::getHtml('pasteafter_.svg') . ' ' : '<a href="' . Controller::addToUrl('act=' . $arrClipboard['mode'] . '&mode=1&rt=' . RequestToken::get() . '&pid=' . $row['id'] . (!\is_array($arrClipboard['id']) ? '&id=' . $arrClipboard['id'] : '')) . '" title="' . StringUtil::specialchars(sprintf($GLOBALS['TL_LANG'][$table]['pasteafter'][1],
-                    $row['id'])) . '" onclick="Backend.getScrollOffset()">' . $imagePasteAfter . '</a> ';
+            $return = $disablePA ? Image::getHtml('pasteafter_.svg').' ' : '<a href="'.Controller::addToUrl('act='.$arrClipboard['mode'].'&mode=1&rt='.RequestToken::get().'&pid='.$row['id'].(!\is_array($arrClipboard['id']) ? '&id='.$arrClipboard['id'] : '')).'" title="'.StringUtil::specialchars(sprintf($GLOBALS['TL_LANG'][$table]['pasteafter'][1],
+                    $row['id'])).'" onclick="Backend.getScrollOffset()">'.$imagePasteAfter.'</a> ';
         }
 
-        return $return . ($disablePI ? Image::getHtml('pasteinto_.svg') . ' ' : '<a href="' . Controller::addToUrl('act=' . $arrClipboard['mode'] . '&mode=2&rt=' . RequestToken::get() . '&pid=' . $row['id'] . (!\is_array($arrClipboard['id']) ? '&id=' . $arrClipboard['id'] : '')) . '" title="' . StringUtil::specialchars(sprintf($GLOBALS['TL_LANG'][$table]['pasteinto'][1],
-                    $row['id'])) . '" onclick="Backend.getScrollOffset()">' . $imagePasteInto . '</a> ');
+        return $return.($disablePI ? Image::getHtml('pasteinto_.svg').' ' : '<a href="'.Controller::addToUrl('act='.$arrClipboard['mode'].'&mode=2&rt='.RequestToken::get().'&pid='.$row['id'].(!\is_array($arrClipboard['id']) ? '&id='.$arrClipboard['id'] : '')).'" title="'.StringUtil::specialchars(sprintf($GLOBALS['TL_LANG'][$table]['pasteinto'][1],
+                    $row['id'])).'" onclick="Backend.getScrollOffset()">'.$imagePasteInto.'</a> ');
     }
 
     /**
@@ -166,13 +166,13 @@ class FileManagerConfigContainer
      */
     public function edit($row, $href, $label, $title, $icon, $attributes)
     {
-        return BackendUser::getInstance()->canEditFieldsOf('tl_file_manager_config') ? '<a href="' . Controller::addToUrl($href . '&amp;id=' . $row['id']) . '&rt=' . RequestToken::get() . '" title="' . StringUtil::specialchars($title) . '"' . $attributes . '>' . Image::getHtml($icon, $label) . '</a> ' : Image::getHtml(preg_replace('/\.svg$/i', '_.svg', $icon)) . ' ';
+        return BackendUser::getInstance()->canEditFieldsOf('tl_file_manager_config') ? '<a href="'.Controller::addToUrl($href.'&amp;id='.$row['id']).'&rt='.RequestToken::get().'" title="'.StringUtil::specialchars($title).'"'.$attributes.'>'.Image::getHtml($icon, $label).'</a> ' : Image::getHtml(preg_replace('/\.svg$/i', '_.svg', $icon)).' ';
     }
 
     /**
      * @Callback(table="tl_file_manager_config", target="fields.template.options")
      */
-    public function getInsertTagAddItemTemplates(DataContainer $dc)
+    public function getModuleTemplatesAsOptions(DataContainer $dc)
     {
         return $this->twigTemplateLocator->getPrefixedFiles(
             'huh_file_manager_'

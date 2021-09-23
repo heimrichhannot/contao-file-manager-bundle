@@ -14,24 +14,25 @@ use Contao\Controller;
 use Contao\CoreBundle\Controller\FrontendModule\AbstractFrontendModuleController;
 use Contao\CoreBundle\Framework\ContaoFramework;
 use Contao\CoreBundle\ServiceAnnotation\FrontendModule;
+use Contao\File;
 use Contao\Model;
+use Contao\ModuleModel;
 use Contao\StringUtil;
+use Contao\System;
+use Contao\Template;
 use HeimrichHannot\FileManagerBundle\Controller\ActionController;
 use HeimrichHannot\FileManagerBundle\DataContainer\FileManagerConfigContainer;
 use HeimrichHannot\FileManagerBundle\Util\FileManagerUtil;
-use HeimrichHannot\UtilsBundle\File\FileUtil;
-use Symfony\Contracts\Translation\TranslatorInterface;
-use Twig\Environment;
-use Contao\File;
-use Contao\ModuleModel;
-use Contao\System;
-use Contao\Template;
+use HeimrichHannot\RequestBundle\Component\HttpFoundation\Request as HuhRequest;
+use HeimrichHannot\StatusMessageBundle\Manager\StatusMessageManager;
 use HeimrichHannot\TwigSupportBundle\Filesystem\TwigTemplateLocator;
+use HeimrichHannot\UtilsBundle\File\FileUtil;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
 use HeimrichHannot\UtilsBundle\Url\UrlUtil;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use HeimrichHannot\RequestBundle\Component\HttpFoundation\Request as HuhRequest;
+use Symfony\Contracts\Translation\TranslatorInterface;
+use Twig\Environment;
 
 /**
  * @FrontendModule(FileManagerModuleController::TYPE,category="miscellaneous")
@@ -40,15 +41,16 @@ class FileManagerModuleController extends AbstractFrontendModuleController
 {
     const TYPE = 'huh_file_manager';
 
-    protected ContaoFramework     $framework;
-    protected Environment         $twig;
-    protected TwigTemplateLocator $twigTemplateLocator;
-    protected TranslatorInterface $translator;
-    protected HuhRequest          $request;
-    protected ModelUtil           $modelUtil;
-    protected UrlUtil             $urlUtil;
-    protected FileUtil            $fileUtil;
-    protected FileManagerUtil     $fileManagerUtil;
+    protected ContaoFramework      $framework;
+    protected Environment          $twig;
+    protected TwigTemplateLocator  $twigTemplateLocator;
+    protected TranslatorInterface  $translator;
+    protected HuhRequest           $request;
+    protected ModelUtil            $modelUtil;
+    protected UrlUtil              $urlUtil;
+    protected FileUtil             $fileUtil;
+    protected FileManagerUtil      $fileManagerUtil;
+    protected StatusMessageManager $statusMessageManager;
 
     public function __construct(
         ContaoFramework $framework,
@@ -59,9 +61,9 @@ class FileManagerModuleController extends AbstractFrontendModuleController
         ModelUtil $modelUtil,
         UrlUtil $urlUtil,
         FileUtil $fileUtil,
-        FileManagerUtil $fileManagerUtil
-    )
-    {
+        FileManagerUtil $fileManagerUtil,
+        StatusMessageManager $statusMessageManager
+    ) {
         $this->framework = $framework;
         $this->twig = $twig;
         $this->twigTemplateLocator = $twigTemplateLocator;
@@ -71,15 +73,25 @@ class FileManagerModuleController extends AbstractFrontendModuleController
         $this->urlUtil = $urlUtil;
         $this->fileUtil = $fileUtil;
         $this->fileManagerUtil = $fileManagerUtil;
+        $this->statusMessageManager = $statusMessageManager;
     }
 
     protected function getResponse(Template $template, ModuleModel $module, Request $request): ?Response
     {
         if (null === ($fileManagerConfig = $this->modelUtil->findModelInstanceByPk('tl_file_manager_config', $module->fileManagerConfig))) {
-            throw new \Exception('File manager config ID ' . $module->fileManagerConfig . ' not found.');
+            throw new \Exception('File manager config ID '.$module->fileManagerConfig.' not found.');
         }
 
         $this->framework->getAdapter(System::class)->loadLanguageFile('tl_file_manager_config');
+
+        $scopeKey = $this->statusMessageManager->getScopeKey(
+            StatusMessageManager::SCOPE_TYPE_MODULE,
+            $module->id
+        );
+
+        $templateData = [
+            'scopeKey' => $scopeKey,
+        ];
 
         $templateName = $this->twigTemplateLocator->getTemplatePath(
             $fileManagerConfig->template ?: 'huh_file_manager_default.html.twig'
@@ -88,16 +100,18 @@ class FileManagerModuleController extends AbstractFrontendModuleController
         $currentFolder = $this->getCurrentFolder($request, $fileManagerConfig);
 
         if (!$currentFolder) {
-            throw new \Exception('No initial folder defined. You can do that either in file manager config ID ' . $module->fileManagerConfig . ' or in the currently logged in member\'s group.');
+            throw new \Exception('No initial folder defined. You can do that either in file manager config ID '.$module->fileManagerConfig.' or in the currently logged in member\'s group.');
         }
 
         if (!$this->checkPermission($currentFolder, $fileManagerConfig)) {
-            $template->content = $this->twig->render($templateName, [
-                'hasError' => true,
-                'message' => $this->translator->trans('huh.file_manager.message.access_denied', [
-                    '{folder}' => $currentFolder
-                ])
-            ]);
+            $this->statusMessageManager->addErrorMessage(
+                $this->translator->trans('huh.file_manager.message.access_denied', [
+                    '{folder}' => $currentFolder,
+                ]),
+                $scopeKey
+            );
+
+            $template->content = $this->twig->render($templateName, $templateData);
 
             return $template->getResponse();
         }
@@ -107,8 +121,6 @@ class FileManagerModuleController extends AbstractFrontendModuleController
         }
 
         $currentFolder = $this->modelUtil->callModelMethod('tl_files', 'findByPath', $currentFolder);
-
-        $templateData = [];
 
         $templateData = $this->addSubFilesAndFolders($currentFolder, $templateData);
 
@@ -149,7 +161,7 @@ class FileManagerModuleController extends AbstractFrontendModuleController
     protected function addSubFilesAndFolders(Model $currentFolder, array $templateData)
     {
         $options = [
-            'order' => 'name ASC'
+            'order' => 'name ASC',
         ];
 
         if ($currentFolder->path) {
@@ -158,16 +170,16 @@ class FileManagerModuleController extends AbstractFrontendModuleController
         } else {
             $folders = $this->modelUtil->findModelInstancesBy('tl_files', [
                 'tl_files.type=?',
-                'tl_files.pid IS NULL'
+                'tl_files.pid IS NULL',
             ], [
-                'folder'
+                'folder',
             ], $options);
 
             $files = $this->modelUtil->findModelInstancesBy('tl_files', [
                 'tl_files.type=?',
-                'tl_files.pid IS NULL'
+                'tl_files.pid IS NULL',
             ], [
-                'file'
+                'file',
             ], $options);
         }
 
@@ -178,7 +190,7 @@ class FileManagerModuleController extends AbstractFrontendModuleController
                 $data = $folders->row();
 
                 $data['_modified'] = date(Config::get('datimFormat'), $folders->tstamp);
-                $data['_href'] = $this->urlUtil->addQueryString('folder=' . $folders->path);
+                $data['_href'] = $this->urlUtil->addQueryString('folder='.$folders->path);
 
                 $folderData[] = $data;
             }
@@ -196,7 +208,7 @@ class FileManagerModuleController extends AbstractFrontendModuleController
                     continue;
                 }
 
-                $data['_href'] = $this->urlUtil->addQueryString('file=' . $files->path);
+                $data['_href'] = $this->urlUtil->addQueryString('file='.$files->path);
                 $data['_modified'] = date(Config::get('datimFormat'), $files->tstamp);
                 $data['_size'] = System::getReadableSize($file->filesize);
 
@@ -210,10 +222,11 @@ class FileManagerModuleController extends AbstractFrontendModuleController
         return $templateData;
     }
 
-    protected function addBreadcrumbNavigation(Model $currentFolder, array $templateData, Model $fileManagerConfig) {
+    protected function addBreadcrumbNavigation(Model $currentFolder, array $templateData, Model $fileManagerConfig)
+    {
         // add parent folders
         $parentFolders = $this->fileUtil->getParentFoldersByUuid($currentFolder->uuid, [
-            'returnRows' => true
+            'returnRows' => true,
         ]);
 
         $parentFolderData = [];
@@ -222,7 +235,7 @@ class FileManagerModuleController extends AbstractFrontendModuleController
             $data = $parentFolder->row();
 
             if ($this->checkPermission($parentFolder->path, $fileManagerConfig)) {
-                $data['_href'] = $this->urlUtil->addQueryString('folder=' . $parentFolder->path);
+                $data['_href'] = $this->urlUtil->addQueryString('folder='.$parentFolder->path);
             }
 
             $parentFolderData[] = $data;
@@ -236,7 +249,8 @@ class FileManagerModuleController extends AbstractFrontendModuleController
         return $templateData;
     }
 
-    protected function addActions(array $templateData, Model $fileManagerConfig, Request $request) {
+    protected function addActions(array $templateData, Model $fileManagerConfig, Request $request)
+    {
         global $objPage;
 
         $actions = StringUtil::deserialize($fileManagerConfig->allowedActions, true);
@@ -261,7 +275,7 @@ class FileManagerModuleController extends AbstractFrontendModuleController
             $actionsData = [];
 
             foreach ($actions as $action) {
-                if ($action === FileManagerConfigContainer::ACTION_UPLOAD) {
+                if (FileManagerConfigContainer::ACTION_UPLOAD === $action) {
                     continue;
                 }
 
@@ -269,9 +283,9 @@ class FileManagerModuleController extends AbstractFrontendModuleController
                     'title' => $GLOBALS['TL_LANG']['tl_file_manager_config']['reference'][$action],
                     'class' => $slug->generate($action),
                     'href' => $this->urlUtil->addQueryString(
-                        'config=' . $fileManagerConfig->uuid . '&redirect=' . $objPage->id . ($redirectParams ? '&redirect_params=' . $redirectParams : ''),
-                        sprintf(\Contao\Environment::get('url') . ActionController::DELETE_URI, StringUtil::binToUuid($folder['uuid']))
-                    )
+                        'config='.$fileManagerConfig->uuid.'&redirect='.$objPage->id.($redirectParams ? '&redirect_params='.$redirectParams : ''),
+                        sprintf(\Contao\Environment::get('url').ActionController::DELETE_URI, StringUtil::binToUuid($folder['uuid']))
+                    ),
                 ];
             }
 
@@ -283,7 +297,7 @@ class FileManagerModuleController extends AbstractFrontendModuleController
             $actionsData = [];
 
             foreach ($actions as $action) {
-                if ($action === FileManagerConfigContainer::ACTION_UPLOAD) {
+                if (FileManagerConfigContainer::ACTION_UPLOAD === $action) {
                     continue;
                 }
 
@@ -291,9 +305,9 @@ class FileManagerModuleController extends AbstractFrontendModuleController
                     'title' => $GLOBALS['TL_LANG']['tl_file_manager_config']['reference'][$action],
                     'class' => $slug->generate($action),
                     'href' => $this->urlUtil->addQueryString(
-                        'config=' . $fileManagerConfig->uuid . '&redirect=' . $objPage->id . ($redirectParams ? '&redirect_params=' . $redirectParams : ''),
-                        sprintf(\Contao\Environment::get('url') . ActionController::DELETE_URI, StringUtil::binToUuid($files['uuid']))
-                    )
+                        'config='.$fileManagerConfig->uuid.'&redirect='.$objPage->id.($redirectParams ? '&redirect_params='.$redirectParams : ''),
+                        sprintf(\Contao\Environment::get('url').ActionController::DELETE_URI, StringUtil::binToUuid($files['uuid']))
+                    ),
                 ];
             }
 
@@ -306,23 +320,22 @@ class FileManagerModuleController extends AbstractFrontendModuleController
     protected function checkPermission(string $currentFolder, Model $fileManagerConfig)
     {
         // check if given folder exists
-        if (null === ($model = $this->modelUtil->callModelMethod('tl_files', 'findByPath', $currentFolder)))
-        {
+        if (null === ($model = $this->modelUtil->callModelMethod('tl_files', 'findByPath', $currentFolder))) {
             return false;
         }
 
         // check file mounts...
         $parentFolders = $this->fileUtil->getParentFoldersByUuid($model->uuid, [
-            'returnRows' => true
+            'returnRows' => true,
         ]);
 
-        $parentFolders = array_map(function($row) {
+        $parentFolders = array_map(function ($row) {
             return $row->uuid;
         }, $parentFolders);
 
         // ... in file manager config
         foreach (StringUtil::deserialize($fileManagerConfig->allowedFolders, true) as $allowedFolder) {
-            if ($model->uuid === $allowedFolder || in_array($allowedFolder, $parentFolders)) {
+            if ($model->uuid === $allowedFolder || \in_array($allowedFolder, $parentFolders)) {
                 return true;
             }
         }
@@ -333,7 +346,7 @@ class FileManagerModuleController extends AbstractFrontendModuleController
         foreach ($groups as $group) {
             if ($group->huhAllowedFolders) {
                 foreach (StringUtil::deserialize($group->huhAllowedFolders, true) as $allowedFolder) {
-                    if ($model->uuid === $allowedFolder || in_array($allowedFolder, $parentFolders)) {
+                    if ($model->uuid === $allowedFolder || \in_array($allowedFolder, $parentFolders)) {
                         return true;
                     }
                 }

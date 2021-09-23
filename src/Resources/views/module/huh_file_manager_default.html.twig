@@ -1,7 +1,9 @@
-{% if hasError|default %}
-    <div class="error{% block errorMessageCssClass %}{% endblock %}">
-        {{ message }}
-    </div>
+{% if app.session.flashBag.peek(scopeKey) is not empty %}
+    {% for message in app.flashes(scopeKey) %}
+        <div class="{{ message.type }}{% block messageCssClass %}{% endblock %}">
+            {{ message.text }}
+        </div>
+    {% endfor %}
 {% else %}
     {% if breadcrumbs is not empty %}
         <nav class="breadcrumbs-nav" aria-label="breadcrumb">
