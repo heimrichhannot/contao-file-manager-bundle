@@ -1,34 +1,38 @@
 {% if app.session.flashBag.peek(scopeKey) is not empty %}
-    {% for message in app.flashes(scopeKey) %}
-        <div class="{{ message.type }}{% block messageCssClass %}{% endblock %}">
-            {{ message.text }}
-        </div>
-    {% endfor %}
-{% else %}
-    {% if breadcrumbs is not empty %}
-        <nav class="breadcrumbs-nav" aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                {% for breadcrumb in breadcrumbs %}
-                    {% if loop.last %}
-                        <li class="item level-{{ loop.index }} active{% block breadcrumbItemCssClass %}{% endblock %}" aria-current="page">
-                            {{ breadcrumb.name }}
-                        </li>
-                    {% else %}
-                        <li class="item level-{{ loop.index }}{{ block('breadcrumbItemCssClass') }}">
-                            {% if breadcrumb._href|default %}
-                                <a href="{{ breadcrumb._href }}">
-                                    {{ breadcrumb.name }}
-                                </a>
-                            {% else %}
-                                {{ breadcrumb.name }}
-                            {% endif %}
-                        </li>
-                    {% endif %}
-                {% endfor %}
-            </ol>
-        </nav>
-    {% endif %}
+    <div class="messages">
+        {% for message in app.flashes(scopeKey) %}
+            <div class="{{ message.type }}{% block messageCssClass %}{% endblock %}">
+                {{ message.text }}
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
 
+{% if breadcrumbs|default([]) is not empty %}
+    <nav class="breadcrumbs-nav" aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            {% for breadcrumb in breadcrumbs %}
+                {% if loop.last %}
+                    <li class="item level-{{ loop.index }} active{% block breadcrumbItemCssClass %}{% endblock %}" aria-current="page">
+                        {{ breadcrumb.name }}
+                    </li>
+                {% else %}
+                    <li class="item level-{{ loop.index }}{{ block('breadcrumbItemCssClass') }}">
+                        {% if breadcrumb._href|default %}
+                            <a href="{{ breadcrumb._href }}">
+                                {{ breadcrumb.name }}
+                            </a>
+                        {% else %}
+                            {{ breadcrumb.name }}
+                        {% endif %}
+                    </li>
+                {% endif %}
+            {% endfor %}
+        </ol>
+    </nav>
+{% endif %}
+
+{% if folderData|default is not empty or filesData|default is not empty %}
     <div class="wrapper{% block tableWrapperCssClass %}{% endblock %}">
         <table class="files-table{% block tableCssClass %}{% endblock %}">
             <thead>

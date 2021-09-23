@@ -13,6 +13,7 @@
     "symfony/http-foundation": "^4.4||^5.0",
     "symfony/routing": "^4.4||^5.0",
     "symfony/translation": "^4.4||^5.0",
+    "symfony/dependency-injection": "^4.4||^5.0",
     "terminal42/service-annotation-bundle": "^1.1"
   },
   "require-dev": {
@@ -40,6 +41,9 @@
       "src/Resources/contao/languages/",
       "src/Resources/contao/templates/"
     ]
+  },
+  "suggest": {
+    "heimrichhannot/contao-encore-bundle": "Symfony Webpack Encore integration for Contao."
   },
   "config": {
     "preferred-install": "dist"

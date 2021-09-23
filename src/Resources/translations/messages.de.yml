@@ -2,8 +2,8 @@ huh:
   file_manager:
     message:
       access_denied: Der Zugriff auf den gewünschten Ordner "{folder}" wurde verweigert.
-      file_deleted_successfully: Die Datei wurde erfolgreich gelöscht.
-      folder_deleted_successfully: Das Verzeichnis wurde erfolgreich gelöscht.
+      file_deleted_successfully: Die Datei {path} wurde erfolgreich gelöscht.
+      folder_deleted_successfully: Das Verzeichnis {path} wurde erfolgreich gelöscht.
     misc:
       name: Name
       size: Größe

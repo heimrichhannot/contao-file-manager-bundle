@@ -6,3 +6,7 @@ services:
 
   HeimrichHannot\FileManagerBundle\:
     resource: '../../{Controller,DataContainer,EventListener,Util}/*'
+
+  HeimrichHannot\FileManagerBundle\Controller\FrontendModule\FileManagerModuleController:
+    calls:
+      - [setEncoreFrontendAsset, ['@?HeimrichHannot\EncoreBundle\Asset\FrontendAsset']]

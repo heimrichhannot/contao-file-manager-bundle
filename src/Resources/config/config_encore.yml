@@ -1,0 +1,6 @@
+huh_encore:
+  js_entries:
+    - { name: contao-file-manager-bundle, file: vendor/heimrichhannot/contao-file-manager-bundle/src/Resources/assets/js/contao-file-manager-bundle-init.js  }
+  unset_global_keys:
+    js:
+    - contao-file-manager-bundle

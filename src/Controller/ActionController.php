@@ -12,6 +12,8 @@ use Contao\CoreBundle\Exception\RedirectResponseException;
 use Contao\CoreBundle\Framework\ContaoFramework;
 use Contao\File;
 use Contao\Folder;
+use HeimrichHannot\FileManagerBundle\Util\FileManagerUtil;
+use HeimrichHannot\StatusMessageBundle\Manager\StatusMessageManager;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
 use HeimrichHannot\UtilsBundle\Url\UrlUtil;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -33,6 +35,8 @@ class ActionController
     protected UrlUtil                  $urlUtil;
     protected TranslatorInterface      $translator;
     protected ContainerInterface       $container;
+    protected StatusMessageManager     $statusMessageManager;
+    protected FileManagerUtil          $fileManagerUtil;
 
     /**
      * @var ContaoFramework
@@ -45,7 +49,9 @@ class ActionController
         EventDispatcherInterface $eventDispatcher,
         ModelUtil $modelUtil,
         UrlUtil $urlUtil,
-        TranslatorInterface $translator
+        TranslatorInterface $translator,
+        StatusMessageManager $statusMessageManager,
+        FileManagerUtil $fileManagerUtil
     ) {
         $this->container = $container;
         $this->framework = $framework;
@@ -53,6 +59,8 @@ class ActionController
         $this->modelUtil = $modelUtil;
         $this->urlUtil = $urlUtil;
         $this->translator = $translator;
+        $this->statusMessageManager = $statusMessageManager;
+        $this->fileManagerUtil = $fileManagerUtil;
     }
 
     /**
@@ -80,25 +88,40 @@ class ActionController
             return new Response('File/folder with given path couldn\'t be found.', 404);
         }
 
-        if ('file' === $model->type) {
-            $file = new File($model->path);
-
-            $file->delete();
-        } elseif ('folder' === $model->type) {
-            $folder = new Folder($model->path);
-
-            $folder->delete();
-        } else {
-            return new Response('File object has invalid type.', 500);
+        if (!$this->fileManagerUtil->checkPermission($model->path, $fileManagerConfig)) {
+            return new Response('Access denied for the given file/folder.', 403);
         }
+
+//        if ('file' === $model->type) {
+//            $file = new File($model->path);
+//
+//            $file->delete();
+//        } elseif ('folder' === $model->type) {
+//            $folder = new Folder($model->path);
+//
+//            $folder->delete();
+//        } else {
+//            return new Response('File object has invalid type.', 500);
+//        }
+
+        $successMessage = $this->translator->trans('huh.file_manager.message.'.$model->type.'_deleted_successfully', [
+            '{path}' => basename($model->name),
+        ]);
 
         if ($request->isXmlHttpRequest()) {
             return new Response($this->translator->trans('huh.file_manager.message.'.$model->type.'_deleted_successfully'));
         }
+
         // redirect if synchronous request (don't allow complete redirect urls to avoid redirect exploitation
         if (null === $page = $this->modelUtil->findModelInstanceByPk('tl_page', $request->get('redirect'))) {
             return new Response('Redirect page with given ID couldn\'t be found.', 404);
         }
+
+        $scopeKey = $this->statusMessageManager->getScopeKey(StatusMessageManager::SCOPE_TYPE_MODULE, $request->get('module'));
+
+        $this->statusMessageManager->addSuccessMessage(
+            $successMessage, $scopeKey
+        );
 
         throw new RedirectResponseException('/'.$this->urlUtil->addQueryString(urldecode($request->get('redirect_params') ?: ''), $page->getFrontendUrl()));
     }
