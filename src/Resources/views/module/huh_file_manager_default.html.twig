@@ -57,7 +57,9 @@
             {% for folder in folderData %}
                 <tr>
                     {% if addThumbnailImages|default %}
-                        <td class="thumbnail"></td>
+                        <td class="thumbnail">
+                            <div class="icon folder"></div>
+                        </td>
                     {% endif %}
 
                     <td class="name">
@@ -90,10 +92,12 @@
                 <tr>
                     {% if addThumbnailImages|default %}
                         <td class="thumbnail">
-                            {% if file._thumbnailPicture|default %}
+                            {% if file._thumbnailImage|default %}
                                 <a class="thumbnail" href="{{ file._href|raw }}">
-                                    <img src="{{ file._thumbnailPicture.path }}" alt="{{ file._thumbnailPicture.alt }}">
+                                    {{ include('@HeimrichHannotContaoUtils/image.html.twig', file._thumbnailImage)  }}
                                 </a>
+                            {% else %}
+                                <div class="icon" data-extension="{{ file.extension }}"></div>
                             {% endif %}
                         </td>
                     {% endif %}

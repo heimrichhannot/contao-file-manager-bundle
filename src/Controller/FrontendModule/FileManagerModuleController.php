@@ -28,6 +28,7 @@ use HeimrichHannot\RequestBundle\Component\HttpFoundation\Request as HuhRequest;
 use HeimrichHannot\StatusMessageBundle\Manager\StatusMessageManager;
 use HeimrichHannot\TwigSupportBundle\Filesystem\TwigTemplateLocator;
 use HeimrichHannot\UtilsBundle\File\FileUtil;
+use HeimrichHannot\UtilsBundle\Image\ImageUtil;
 use HeimrichHannot\UtilsBundle\Model\ModelUtil;
 use HeimrichHannot\UtilsBundle\Url\UrlUtil;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -230,7 +231,7 @@ class FileManagerModuleController extends AbstractFrontendModuleController
                 }
 
                 if ($fileManagerConfig->addThumbnailImages) {
-                    $data['_thumbnailPicture'] = $this->getThumbnailImage($files->current(), $fileManagerConfig);
+                    $data['_thumbnailImage'] = $this->getThumbnailImage($files->current(), $fileManagerConfig);
                 }
 
                 $data['_href'] = $this->urlUtil->addQueryString('file='.$files->path);
@@ -253,11 +254,9 @@ class FileManagerModuleController extends AbstractFrontendModuleController
             return null;
         }
 
-        $picture = $this->pictureFactory->create(
-            $this->getParameter('kernel.project_dir').'/'.$file->path,
-            StringUtil::deserialize($fileManagerConfig->thumbnailImageSize, true)
-        );
+        $data = $file->row();
 
+        // add alt
         $meta = StringUtil::deserialize($file->meta, true);
 
         $alt = '';
@@ -266,10 +265,17 @@ class FileManagerModuleController extends AbstractFrontendModuleController
             $alt = $meta[$GLOBALS['TL_LANGUAGE'] ?: 'en']['alt'];
         }
 
-        return [
-            'path' => $picture->getImg($this->getParameter('kernel.project_dir'))['src'],
-            'alt' => $alt,
-        ];
+        $data['alt'] = $alt;
+
+        // create image
+        $data['size'] = StringUtil::deserialize($fileManagerConfig->thumbnailImageSize, true);
+
+        $thumbnail = System::getContainer()->get(ImageUtil::class)->prepareImage($data, [
+            'imageField' => 'uuid',
+            'imageSelectorField' => null,
+        ]);
+
+        return $thumbnail;
     }
 
     protected function addBreadcrumbNavigation(Model $currentFolder, array $templateData, Model $fileManagerConfig)
