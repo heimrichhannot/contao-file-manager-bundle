@@ -19,15 +19,13 @@ The file manager in the frontend
 ## Installation
 
 1. Install via composer: `composer require heimrichhannot/contao-file-manager-bundle`.
+2. Update your database using migration command or install tool as usual.
 
 ## Usage
 
-1. 
-
-## Events
-
-Event               | Description
---------------------|------------
+1. Create a file manager config in the contao backend.
+2. Create member groups if the file manager is non-public. Here you can extend the permissions of the file manager config.
+3. Create a frontend module and assign the file manager config. Then place the module in an article you like.
 
 ## TODO
 

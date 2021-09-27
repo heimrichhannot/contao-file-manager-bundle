@@ -175,8 +175,6 @@ class FileManagerModuleController extends AbstractFrontendModuleController
             }
         }
 
-        // TODO event
-
         return $currentFolder;
     }
 

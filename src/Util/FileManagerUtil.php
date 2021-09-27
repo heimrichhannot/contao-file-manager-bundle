@@ -87,8 +87,6 @@ class FileManagerUtil
             }
         }
 
-        // TODO event
-
         return false;
     }
 }

@@ -6,6 +6,7 @@
   "require": {
     "php": "^8.0",
     "contao/core-bundle": "^4.9",
+    "heimrichhannot/contao-status-message-bundle": "^0.1",
     "heimrichhannot/contao-utils-bundle": "^2.204",
     "symfony/config": "^4.4||^5.0",
     "symfony/event-dispatcher": "^4.4||^5.0",
