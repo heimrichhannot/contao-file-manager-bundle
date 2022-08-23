@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.2] 2022-08-23
+- Fixed: missing translations
+
 ## [0.1.1] 2022-08-23
 - Added: meta data for folders
 - Changed: allow php 7.4

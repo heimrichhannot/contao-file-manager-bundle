@@ -9,6 +9,6 @@
 $lang = &$GLOBALS['TL_LANG']['tl_files'];
 
 $lang['huhFm_folderMeta'] = [
-    'Metadaten',
-    'Hier können Sie die Metadaten den Ordner eingeben.',
+    'Meta data',
+    'Here you can enter the folder meta data.',
 ];
