@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright (c) 2021 Heimrich & Hannot GmbH
+ * Copyright (c) 2022 Heimrich & Hannot GmbH
  *
  * @license LGPL-3.0-or-later
  */
@@ -33,6 +33,7 @@ use HeimrichHannot\UtilsBundle\Model\ModelUtil;
 use HeimrichHannot\UtilsBundle\Url\UrlUtil;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Environment;
@@ -55,6 +56,7 @@ class FileManagerModuleController extends AbstractFrontendModuleController
     protected FileManagerUtil         $fileManagerUtil;
     protected StatusMessageManager    $statusMessageManager;
     protected PictureFactoryInterface $pictureFactory;
+    private RequestStack              $requestStack;
 
     public function __construct(
         ContainerInterface $container,
@@ -68,7 +70,8 @@ class FileManagerModuleController extends AbstractFrontendModuleController
         FileUtil $fileUtil,
         FileManagerUtil $fileManagerUtil,
         StatusMessageManager $statusMessageManager,
-        PictureFactoryInterface $pictureFactory
+        PictureFactoryInterface $pictureFactory,
+        RequestStack $requestStack
     ) {
         $this->container = $container;
         $this->framework = $framework;
@@ -82,6 +85,7 @@ class FileManagerModuleController extends AbstractFrontendModuleController
         $this->fileManagerUtil = $fileManagerUtil;
         $this->statusMessageManager = $statusMessageManager;
         $this->pictureFactory = $pictureFactory;
+        $this->requestStack = $requestStack;
     }
 
     public function addEncoreAssets()
@@ -208,6 +212,16 @@ class FileManagerModuleController extends AbstractFrontendModuleController
         if (null !== $folders) {
             while ($folders->next()) {
                 $data = $folders->row();
+
+                $data['meta'] = StringUtil::deserialize($data['huhFm_folderMeta'], true);
+                unset($data['huhFm_folderMeta']);
+
+                $data['title'] = $data['name'];
+                $locale = $this->requestStack->getCurrentRequest()->attributes->get('_locale') ?? 'en';
+
+                if (!empty($data['meta'][$locale]['title'])) {
+                    $data['title'] = $data['meta'][$locale]['title'];
+                }
 
                 $data['_modified'] = date(Config::get('datimFormat'), $folders->tstamp);
                 $data['_href'] = $this->urlUtil->addQueryString('folder='.$folders->path);
