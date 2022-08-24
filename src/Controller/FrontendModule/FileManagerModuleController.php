@@ -21,6 +21,7 @@ use Contao\ModuleModel;
 use Contao\StringUtil;
 use Contao\System;
 use Contao\Template;
+use HeimrichHannot\FileCreditsBundle\Model\FilesModel;
 use HeimrichHannot\FileManagerBundle\Controller\ActionController;
 use HeimrichHannot\FileManagerBundle\DataContainer\FileManagerConfigContainer;
 use HeimrichHannot\FileManagerBundle\Util\FileManagerUtil;
@@ -213,15 +214,7 @@ class FileManagerModuleController extends AbstractFrontendModuleController
             while ($folders->next()) {
                 $data = $folders->row();
 
-                $data['meta'] = StringUtil::deserialize($data['huhFm_folderMeta'], true);
-                unset($data['huhFm_folderMeta']);
-
-                $data['title'] = $data['name'];
-                $locale = $this->requestStack->getCurrentRequest()->attributes->get('_locale') ?? 'en';
-
-                if (!empty($data['meta'][$locale]['title'])) {
-                    $data['title'] = $data['meta'][$locale]['title'];
-                }
+                $data = $this->setFolderMeta($data);
 
                 $data['_modified'] = date(Config::get('datimFormat'), $folders->tstamp);
                 $data['_href'] = $this->urlUtil->addQueryString('folder='.$folders->path);
@@ -290,10 +283,11 @@ class FileManagerModuleController extends AbstractFrontendModuleController
         return $thumbnail;
     }
 
-    protected function addBreadcrumbNavigation(Model $currentFolder, array $templateData, Model $fileManagerConfig)
+    protected function addBreadcrumbNavigation(Model $currentFolderData, array $templateData, Model $fileManagerConfig)
     {
         // add parent folders
-        $parentFolders = $this->fileUtil->getParentFoldersByUuid($currentFolder->uuid, [
+        /** @var FilesModel[] $parentFolders */
+        $parentFolders = $this->fileUtil->getParentFoldersByUuid($currentFolderData->uuid, [
             'returnRows' => true,
         ]);
 
@@ -301,6 +295,8 @@ class FileManagerModuleController extends AbstractFrontendModuleController
 
         foreach (array_reverse($parentFolders) as $parentFolder) {
             $data = $parentFolder->row();
+
+            $data = $this->setFolderMeta($data);
 
             if ($this->fileManagerUtil->checkPermission($parentFolder->path, $fileManagerConfig)) {
                 $data['_href'] = $this->urlUtil->addQueryString('folder='.$parentFolder->path);
@@ -310,7 +306,9 @@ class FileManagerModuleController extends AbstractFrontendModuleController
         }
 
         // add current folder
-        $parentFolderData[] = $currentFolder->row();
+        $currentFolderData = $currentFolderData->row();
+        $currentFolderData = $this->setFolderMeta($currentFolderData);
+        $parentFolderData[] = $currentFolderData;
 
         $templateData['breadcrumbs'] = $parentFolderData;
 
@@ -418,5 +416,23 @@ class FileManagerModuleController extends AbstractFrontendModuleController
         }
 
         return trim($result);
+    }
+
+    /**
+     * Set the folder meta data.
+     */
+    protected function setFolderMeta(array $data): array
+    {
+        $data['meta'] = StringUtil::deserialize($data['huhFm_folderMeta'], true);
+        unset($data['huhFm_folderMeta']);
+
+        $data['title'] = $data['name'];
+        $locale = $this->requestStack->getCurrentRequest()->attributes->get('_locale') ?? 'en';
+
+        if (!empty($data['meta'][$locale]['title'])) {
+            $data['title'] = $data['meta'][$locale]['title'];
+        }
+
+        return $data;
     }
 }

@@ -14,16 +14,16 @@
             {% for breadcrumb in breadcrumbs %}
                 {% if loop.last %}
                     <li class="item level-{{ loop.index }} active{% block breadcrumbItemCssClass %}{% endblock %}" aria-current="page">
-                        {{ breadcrumb.name }}
+                        {{ breadcrumb.title }}
                     </li>
                 {% else %}
                     <li class="item level-{{ loop.index }}{{ block('breadcrumbItemCssClass') }}">
                         {% if breadcrumb._href|default %}
                             <a href="{{ breadcrumb._href }}">
-                                {{ breadcrumb.name }}
+                                {{ breadcrumb.title }}
                             </a>
                         {% else %}
-                            {{ breadcrumb.name }}
+                            {{ breadcrumb.title }}
                         {% endif %}
                     </li>
                 {% endif %}
